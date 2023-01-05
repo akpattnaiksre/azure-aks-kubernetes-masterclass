@@ -39,7 +39,7 @@
 
 az group create --name myResourceGroup --location eastus
 
-az aks create -g myResourceGroup -n myAKSCluster --enable-managed-identity --node-count 1 --enable-addons monitoring --enable-msi-auth-for-monitoring  --generate-ssh-keys
+az aks create -g myResourceGroup -n aksdemo1 --enable-managed-identity --node-count 1 --enable-addons monitoring --enable-msi-auth-for-monitoring  --generate-ssh-keys
 
 ## Step-03: Cloud Shell - Configure kubectl to connect to AKS Cluster
 - Go to https://shell.azure.com
