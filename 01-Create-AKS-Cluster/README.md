@@ -4,6 +4,7 @@
 - Understand about AKS Cluster
 - Discuss about Kubernetes Architecture from AKS Cluster perspective
 
+
 ## Step-02: Create AKS Cluster
 - Create Kubernetes Cluster
 - **Basics**
@@ -31,6 +32,12 @@
 - **Review + Create**
   - Click on **Create**
 
+
+## Step-02: Create AKS Cluster
+
+**AKS through CLI**
+az group create --name myResourceGroup --location eastus
+az aks create -g myResourceGroup -n myAKSCluster --enable-managed-identity --node-count 1 --enable-addons monitoring --enable-msi-auth-for-monitoring  --generate-ssh-keys
 
 ## Step-03: Cloud Shell - Configure kubectl to connect to AKS Cluster
 - Go to https://shell.azure.com
