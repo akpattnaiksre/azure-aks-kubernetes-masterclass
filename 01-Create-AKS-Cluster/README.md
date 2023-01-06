@@ -153,9 +153,11 @@ kubectl delete -f kube-manifests/
 
 # Create AKS Cluster and Applicationgateway using cmd:
 
+### Create Resource Group:
+
 az group create --name aks-westus --location westus
 
-###Create a VNET and a subnet for the AKS cluster:
+### Create a VNET and a subnet for the AKS cluster:
 
 az network vnet create \
     --resource-group aks-westus \
