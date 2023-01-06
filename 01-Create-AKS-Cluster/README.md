@@ -148,3 +148,77 @@ kubectl delete -f kube-manifests/
 
 ## Why Managed Identity when creating Cluster?
 - https://docs.microsoft.com/en-us/azure/aks/use-managed-identity
+
+
+
+# Create AKS Cluster and Applicationgateway using cmd:
+
+az group create --name aks-westus --location westus
+
+###Create a VNET and a subnet for the AKS cluster:
+
+az network vnet create \
+    --resource-group aks-westus \
+    --name aks-westus-vnet\
+    --address-prefixes 192.168.0.0/18 \
+    --subnet-name aks-westus-subnet \
+    --subnet-prefix 192.168.1.0/24
+    
+    
+## Create a subnet for APP Gateway:
+
+az network vnet subnet create \
+   --name aks-westus-appgw-subnet \
+   --resource-group aks-westus \
+   --vnet-name aks-westus-vnet   \
+   --address-prefix 192.168.2.0/24
+   
+## Create a static public IP:
+
+az network public-ip create \
+   --resource-group aks-westus \
+   --name aks-westus-cluster-appgw-pip \
+   --allocation-method Static \
+   --dns-name aks-westus-cluster-appgw \
+   --sku Standard
+### get public IP value and ID (we will need it later)
+
+AKS_PUB_IP=$(az network public-ip show -g aks-westus -n aks-westus-cluster-appgw-pip --query ipAddress -o tsv)
+
+AKS_PUB_IP_ID=$(az network public-ip show -g aks-westus -n aks-westus-cluster-appgw-pip --query id -o tsv)
+
+### Deploy App gateway using our static IP and our subnet:
+
+az network application-gateway create \
+   --name aks-westus-appgw \
+   --location westus \
+   --resource-group aks-westus \
+   --capacity 2 \
+   --sku Standard_v2 \
+   --public-ip-address aks-westus-cluster-appgw-pip\
+   --vnet-name aks-westus-vnet\
+   --subnet aks-westus-appgw-subnet
+   --priority 100
+   
+ ### get application gateway id
+ 
+APPGW_ID=$(az network application-gateway show -g aks-westus -n aks-westus-appgw --query id -o tsv)
+
+AKS_WESTUS_SUBNET_ID=$(az network vnet subnet show --resource-group aks-westus --vnet-name aks-westus-vnet --name aks-westus-subnet --query id -o tsv)
+
+### Deploy an AKS cluster using our subnet resource ID: 
+
+az aks create -y \
+    --resource-group aks-westus \
+    --name aks-westus-cluster \
+    --enable-managed-identity \
+    --network-plugin azure \
+    --vnet-subnet-id $AKS_WESTUS_SUBNET_ID \
+    --docker-bridge-address 172.17.0.1/16 \
+    --service-cidr 10.2.0.0/24 \
+    --dns-service-ip 10.2.0.10 \
+    --enable-managed-identity \
+    --generate-ssh-keys \
+    --enable-addons ingress-appgw \
+    --appgw-id $APPGW_ID
+   
